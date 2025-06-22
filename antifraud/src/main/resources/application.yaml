@@ -3,3 +3,5 @@ spring:
     name: anti-fraud-app
   profiles:
     active: local
+transfer:
+  suspicious-threshold: 1000
