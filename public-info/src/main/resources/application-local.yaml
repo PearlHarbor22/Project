@@ -18,9 +18,16 @@ spring:
     username: postgres
     password: password
   liquibase:
-    default-schema: public_info
+    default-schema: publicinfo
     change-log: db/changelog/db.changelog-master.yaml
-    enabled: true
-    drop-first: false
+    enabled: ${LIQUIBASE_ENABLED:true}
+    drop-first: ${LIQUIBASE_DROP_FIRST:false}
   application:
     name: public-info-app
+  kafka:
+    consumer:
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    bootstrap-servers: kafka:9092
+
