@@ -23,10 +23,12 @@ public class KafkaConfig {
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
 
+    private static final String COM_BANK_HISTORY_DTO = "com.bank.history.dto";
+
     @Bean
     public ConsumerFactory<String, HistoryDto> consumerFactory() {
         JsonDeserializer<HistoryDto> deserializer = new JsonDeserializer<>(HistoryDto.class);
-        deserializer.addTrustedPackages("com.bank.history.dto");
+        deserializer.addTrustedPackages(COM_BANK_HISTORY_DTO);
 
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);

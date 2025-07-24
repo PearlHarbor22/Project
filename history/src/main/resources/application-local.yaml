@@ -16,7 +16,7 @@ management:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5433/postgres
     username: postgres
     password: password
 
@@ -37,6 +37,6 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "*"
+        spring.json.trusted.packages: com.bank.history.dto
         spring.json.value.default.type: com.bank.history.dto.HistoryDto
         spring.json.use.type.headers: false
