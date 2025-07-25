@@ -2,6 +2,7 @@ server:
   port: 8089
   servlet:
     context-path: /api/profile
+
 management:
   server:
     port: 8189
@@ -12,15 +13,64 @@ management:
     web:
       exposure:
         include: '*'
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/postgres
     username: postgres
     password: password
+
   liquibase:
     default-schema: profile
-    change-log: db/changelog/db.changelog-master.yaml
+    change-log: classpath:db/changelog/db.changelog-master.yaml
     enabled: true
     drop-first: false
+
   application:
     name: profile-app
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: profile-group
+      auto-offset-reset: latest
+      enable-auto-commit: true
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: com.bank.profile.dto
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+custom-kafka:
+  topic-mapping:
+    auth.users: com.bank.profile.dto.AuthDto
+    audit-profile: com.bank.profile.dto.AuditDto
+    profile.create: com.bank.profile.dto.ProfileDto
+    profile.update: com.bank.profile.dto.ProfileDto
+    profile.get: com.bank.profile.dto.ProfileDto
+    profile.delete: com.bank.profile.dto.ProfileDto
+
+app:
+  kafka:
+    audit:
+      topic: audit-profile
+      group-id: audit-group
+    auth:
+      topic: auth.users
+      group-id: profile-group
+    profile:
+      create-topic: profile.create
+      update-topic: profile.update
+      delete-topic: profile.delete
+      get-topic: profile.get
+      group-id: profile-group
