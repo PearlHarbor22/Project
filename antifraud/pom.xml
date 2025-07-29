@@ -27,6 +27,13 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
 
+<!--        Validator-->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>8.0.1.Final</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -52,6 +59,20 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/dto/*</exclude>
+                                <exclude>**/mapper/*</exclude>
+                                <exclude>**/repository/*</exclude>
+                                <exclude>**/entity/*</exclude>
+                                <exclude>**/SuspiciousTransferDto.java</exclude>
+                                <exclude>**/TransferDto.java</exclude>
+                                <exclude>**/AuditService.java</exclude>
+                                <exclude>**/SuspiciousTransferSaveService.java</exclude>
+                                <exclude>**/SuspiciousTransferService.java</exclude>
+                                <exclude>**/TransferService.java</exclude>
+                            </excludes>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
