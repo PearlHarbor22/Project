@@ -73,7 +73,7 @@ public class HistoryServiceImpl implements HistoryService {
         }
 
         try {
-            HistoryEntity entity = mapper.toEntity(dto);
+            final HistoryEntity entity = mapper.toEntity(dto);
             repository.save(entity);
             log.info("История успешно сохранена: {}", entity);
         } catch (Exception e) {
