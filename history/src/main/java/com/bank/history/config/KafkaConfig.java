@@ -17,20 +17,20 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
+    private static final String COM_BANK_HISTORY_DTO = "com.bank.history.dto";
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
 
-    private static final String COM_BANK_HISTORY_DTO = "com.bank.history.dto";
-
     @Bean
     public ConsumerFactory<String, HistoryDto> consumerFactory() {
-        JsonDeserializer<HistoryDto> deserializer = new JsonDeserializer<>(HistoryDto.class);
+        final JsonDeserializer<HistoryDto> deserializer = new JsonDeserializer<>(HistoryDto.class);
         deserializer.addTrustedPackages(COM_BANK_HISTORY_DTO);
 
-        Map<String, Object> props = new HashMap<>();
+        final Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -41,7 +41,7 @@ public class KafkaConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, HistoryDto> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, HistoryDto> factory =
+        final ConcurrentKafkaListenerContainerFactory<String, HistoryDto> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
