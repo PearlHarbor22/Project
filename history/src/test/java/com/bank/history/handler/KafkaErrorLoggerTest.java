@@ -4,28 +4,37 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 
+import static com.bank.history.util.TestData.NOT_FOUND_MESSAGE;
+import static com.bank.history.util.TestData.VALIDATION_ERROR_MESSAGE;
+import static com.bank.history.util.TestData.PROCESSING_ERROR_MESSAGE;
+import static com.bank.history.util.TestData.PAYLOAD_DATA;
+import static com.bank.history.util.TestData.PAYLOAD_NUMBER;
+
 public class KafkaErrorLoggerTest {
 
     private final KafkaErrorLogger errorLogger = new KafkaErrorLogger();
 
     @Test
     void handleEntityNotFoundException_DoesNotThrow() {
-        EntityNotFoundException ex = new EntityNotFoundException("Не найдена сущность");
-        Object payload = "payload_data";
+        Object payload = PAYLOAD_DATA;
+        EntityNotFoundException ex = new EntityNotFoundException(NOT_FOUND_MESSAGE);
+
         errorLogger.handleEntityNotFoundException(ex, payload);
     }
 
     @Test
     void handleValidationException_DoesNotThrow() {
-        ValidationException ex = new ValidationException("Ошибка валидации");
-        Object payload = 42;
+        Object payload = PAYLOAD_NUMBER;
+        ValidationException ex = new ValidationException(VALIDATION_ERROR_MESSAGE);
+
         errorLogger.handleValidationException(ex, payload);
     }
 
     @Test
     void handleProcessingError_DoesNotThrow() {
-        Exception ex = new Exception("Что-то пошло не так");
         Object payload = null;
+        Exception ex = new Exception(PROCESSING_ERROR_MESSAGE);
+
         errorLogger.handleProcessingError(ex, payload);
     }
 }
