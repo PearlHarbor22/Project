@@ -8,17 +8,17 @@ import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.bank.history.util.TestData.ENTITY_ID_1;
-import static com.bank.history.util.TestData.TRANSFER_AUDIT_ID;
-import static com.bank.history.util.TestData.PROFILE_AUDIT_ID;
 import static com.bank.history.util.TestData.ACCOUNT_AUDIT_ID;
+import static com.bank.history.util.TestData.ACCOUNT_AUDIT_ID_TWO;
 import static com.bank.history.util.TestData.ANTI_FRAUD_AUDIT_ID;
+import static com.bank.history.util.TestData.ENTITY_ID_ONE;
+import static com.bank.history.util.TestData.ENTITY_ID_TEN;
+import static com.bank.history.util.TestData.PROFILE_AUDIT_ID;
+import static com.bank.history.util.TestData.PROFILE_AUDIT_ID_TWO;
 import static com.bank.history.util.TestData.PUBLIC_BANK_INFO_AUDIT_ID;
-import static com.bank.history.util.TestData.ENTITY_ID_10;
-import static com.bank.history.util.TestData.TRANSFER_AUDIT_ID_2;
-import static com.bank.history.util.TestData.PROFILE_AUDIT_ID_2;
-import static com.bank.history.util.TestData.ACCOUNT_AUDIT_ID_2;
 import static com.bank.history.util.TestData.SINGLE_ENTITY_ID;
+import static com.bank.history.util.TestData.TRANSFER_AUDIT_ID;
+import static com.bank.history.util.TestData.TRANSFER_AUDIT_ID_TWO;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -45,7 +45,7 @@ public class HistoryKafkaListenerTest {
 
     @Test
     void transfer_save() {
-        HistoryDto dto = HistoryDto.builder().id(ENTITY_ID_1).build();
+        HistoryDto dto = HistoryDto.builder().id(ENTITY_ID_ONE).build();
 
         listener.listenTransfer(dto);
 
@@ -92,7 +92,7 @@ public class HistoryKafkaListenerTest {
 
     @Test
     void transfer_entityNotFound() {
-        HistoryDto dto = HistoryDto.builder().id(ENTITY_ID_10).build();
+        HistoryDto dto = HistoryDto.builder().id(ENTITY_ID_TEN).build();
         doThrow(new EntityNotFoundException(ERROR_NOT_FOUND)).when(historyService).save(dto);
 
         listener.listenTransfer(dto);
@@ -102,7 +102,7 @@ public class HistoryKafkaListenerTest {
 
     @Test
     void profile_validationError() {
-        HistoryDto dto = HistoryDto.builder().id(TRANSFER_AUDIT_ID_2).build();
+        HistoryDto dto = HistoryDto.builder().id(TRANSFER_AUDIT_ID_TWO).build();
         doThrow(new ValidationException(ERROR_INVALID)).when(historyService).save(dto);
 
         listener.listenProfile(dto);
@@ -112,7 +112,7 @@ public class HistoryKafkaListenerTest {
 
     @Test
     void account_processingError() {
-        HistoryDto dto = HistoryDto.builder().id(PROFILE_AUDIT_ID_2).build();
+        HistoryDto dto = HistoryDto.builder().id(PROFILE_AUDIT_ID_TWO).build();
         doThrow(new RuntimeException(ERROR_FAIL)).when(historyService).save(dto);
 
         listener.listenAccount(dto);
@@ -132,7 +132,7 @@ public class HistoryKafkaListenerTest {
 
     @Test
     void antiFraud_entityNotFound() {
-        HistoryDto dto = HistoryDto.builder().id(TRANSFER_AUDIT_ID_2).build();
+        HistoryDto dto = HistoryDto.builder().id(TRANSFER_AUDIT_ID_TWO).build();
         doThrow(new EntityNotFoundException(ERROR_NOT_FOUND)).when(historyService).save(dto);
 
         listener.listenAntiFraud(dto);
@@ -142,7 +142,7 @@ public class HistoryKafkaListenerTest {
 
     @Test
     void publicBankInfo_validationError() {
-        HistoryDto dto = HistoryDto.builder().id(PROFILE_AUDIT_ID_2).build();
+        HistoryDto dto = HistoryDto.builder().id(PROFILE_AUDIT_ID_TWO).build();
         doThrow(new ValidationException(ERROR_INVALID)).when(historyService).save(dto);
 
         listener.listenPublicBankInfo(dto);
@@ -152,7 +152,7 @@ public class HistoryKafkaListenerTest {
 
     @Test
     void authorization_processingError() {
-        HistoryDto dto = HistoryDto.builder().id(ACCOUNT_AUDIT_ID_2).build();
+        HistoryDto dto = HistoryDto.builder().id(ACCOUNT_AUDIT_ID_TWO).build();
         doThrow(new RuntimeException(ERROR_FAIL)).when(historyService).save(dto);
 
         listener.listenAuthorization(dto);

@@ -5,23 +5,24 @@ import com.bank.history.entity.HistoryEntity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import static com.bank.history.util.TestData.ENTITY_ID_1;
-import static com.bank.history.util.TestData.ENTITY_ID_10;
-import static com.bank.history.util.TestData.TRANSFER_AUDIT_ID;
-import static com.bank.history.util.TestData.TRANSFER_AUDIT_ID_2;
-import static com.bank.history.util.TestData.PROFILE_AUDIT_ID;
-import static com.bank.history.util.TestData.PROFILE_AUDIT_ID_2;
-import static com.bank.history.util.TestData.ACCOUNT_AUDIT_ID;
-import static com.bank.history.util.TestData.ACCOUNT_AUDIT_ID_2;
-import static com.bank.history.util.TestData.ANTI_FRAUD_AUDIT_ID;
-import static com.bank.history.util.TestData.ANTI_FRAUD_AUDIT_ID_2;
-import static com.bank.history.util.TestData.PUBLIC_BANK_INFO_AUDIT_ID;
-import static com.bank.history.util.TestData.PUBLIC_BANK_INFO_AUDIT_ID_2;
-import static com.bank.history.util.TestData.AUTH_AUDIT_ID;
-import static com.bank.history.util.TestData.AUTH_AUDIT_ID_2;
-import static com.bank.history.util.TestData.SINGLE_ENTITY_ID;
 
 import java.util.List;
+
+import static com.bank.history.util.TestData.ACCOUNT_AUDIT_ID;
+import static com.bank.history.util.TestData.ACCOUNT_AUDIT_ID_TWO;
+import static com.bank.history.util.TestData.ANTI_FRAUD_AUDIT_ID;
+import static com.bank.history.util.TestData.ANTI_FRAUD_AUDIT_ID_TWO;
+import static com.bank.history.util.TestData.AUTH_AUDIT_ID;
+import static com.bank.history.util.TestData.AUTH_AUDIT_ID_TWO;
+import static com.bank.history.util.TestData.ENTITY_ID_ONE;
+import static com.bank.history.util.TestData.ENTITY_ID_TEN;
+import static com.bank.history.util.TestData.PROFILE_AUDIT_ID;
+import static com.bank.history.util.TestData.PROFILE_AUDIT_ID_TWO;
+import static com.bank.history.util.TestData.PUBLIC_BANK_INFO_AUDIT_ID;
+import static com.bank.history.util.TestData.PUBLIC_BANK_INFO_AUDIT_ID_TWO;
+import static com.bank.history.util.TestData.SINGLE_ENTITY_ID;
+import static com.bank.history.util.TestData.TRANSFER_AUDIT_ID;
+import static com.bank.history.util.TestData.TRANSFER_AUDIT_ID_TWO;
 
 public class HistoryMapperTest {
 
@@ -29,9 +30,9 @@ public class HistoryMapperTest {
 
     @Test
     void toDto_AllFields() {
-        // Создаем сущность с тестовыми значениями из TestData
+
         HistoryEntity entity = HistoryEntity.builder()
-                .id(ENTITY_ID_1)
+                .id(ENTITY_ID_ONE)
                 .transferAuditId(TRANSFER_AUDIT_ID)
                 .profileAuditId(PROFILE_AUDIT_ID)
                 .accountAuditId(ACCOUNT_AUDIT_ID)
@@ -53,15 +54,15 @@ public class HistoryMapperTest {
 
     @Test
     void toEntity_AllFields() {
-        // Создаем dto с тестовыми значениями из TestData
+
         HistoryDto dto = HistoryDto.builder()
-                .id(ENTITY_ID_10)
-                .transferAuditId(TRANSFER_AUDIT_ID_2)
-                .profileAuditId(PROFILE_AUDIT_ID_2)
-                .accountAuditId(ACCOUNT_AUDIT_ID_2)
-                .antiFraudAuditId(ANTI_FRAUD_AUDIT_ID_2)
-                .publicBankInfoAuditId(PUBLIC_BANK_INFO_AUDIT_ID_2)
-                .authorizationAuditId(AUTH_AUDIT_ID_2)
+                .id(ENTITY_ID_TEN)
+                .transferAuditId(TRANSFER_AUDIT_ID_TWO)
+                .profileAuditId(PROFILE_AUDIT_ID_TWO)
+                .accountAuditId(ACCOUNT_AUDIT_ID_TWO)
+                .antiFraudAuditId(ANTI_FRAUD_AUDIT_ID_TWO)
+                .publicBankInfoAuditId(PUBLIC_BANK_INFO_AUDIT_ID_TWO)
+                .authorizationAuditId(AUTH_AUDIT_ID_TWO)
                 .build();
 
         HistoryEntity entity = mapper.toEntity(dto);
@@ -79,13 +80,13 @@ public class HistoryMapperTest {
     void toDtoList_ListMapping() {
 
         HistoryEntity entity1 = HistoryEntity.builder()
-                .id(ENTITY_ID_1)
+                .id(ENTITY_ID_ONE)
                 .authorizationAuditId(AUTH_AUDIT_ID)
                 .build();
 
         HistoryEntity entity2 = HistoryEntity.builder()
-                .id(ENTITY_ID_10)
-                .publicBankInfoAuditId(PUBLIC_BANK_INFO_AUDIT_ID_2)
+                .id(ENTITY_ID_TEN)
+                .publicBankInfoAuditId(PUBLIC_BANK_INFO_AUDIT_ID_TWO)
                 .build();
 
         var dtoList = mapper.toDtoList(List.of(entity1, entity2));

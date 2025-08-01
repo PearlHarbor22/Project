@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.mock;
 
-
 public class HistoryServiceImplTest {
 
     private final HistoryRepository repository = mock(HistoryRepository.class);

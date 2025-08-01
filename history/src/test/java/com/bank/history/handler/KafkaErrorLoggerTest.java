@@ -9,6 +9,7 @@ import static com.bank.history.util.TestData.VALIDATION_ERROR_MESSAGE;
 import static com.bank.history.util.TestData.PROCESSING_ERROR_MESSAGE;
 import static com.bank.history.util.TestData.PAYLOAD_DATA;
 import static com.bank.history.util.TestData.PAYLOAD_NUMBER;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class KafkaErrorLoggerTest {
 
@@ -19,7 +20,7 @@ public class KafkaErrorLoggerTest {
         Object payload = PAYLOAD_DATA;
         EntityNotFoundException ex = new EntityNotFoundException(NOT_FOUND_MESSAGE);
 
-        errorLogger.handleEntityNotFoundException(ex, payload);
+        assertDoesNotThrow(() -> errorLogger.handleEntityNotFoundException(ex, payload));
     }
 
     @Test
@@ -27,7 +28,7 @@ public class KafkaErrorLoggerTest {
         Object payload = PAYLOAD_NUMBER;
         ValidationException ex = new ValidationException(VALIDATION_ERROR_MESSAGE);
 
-        errorLogger.handleValidationException(ex, payload);
+        assertDoesNotThrow(() -> errorLogger.handleValidationException(ex, payload));
     }
 
     @Test
@@ -35,6 +36,6 @@ public class KafkaErrorLoggerTest {
         Object payload = null;
         Exception ex = new Exception(PROCESSING_ERROR_MESSAGE);
 
-        errorLogger.handleProcessingError(ex, payload);
+        assertDoesNotThrow(() -> errorLogger.handleProcessingError(ex, payload));
     }
 }
