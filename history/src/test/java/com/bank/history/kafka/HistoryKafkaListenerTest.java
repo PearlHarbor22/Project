@@ -8,7 +8,17 @@ import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.bank.history.util.TestData.*;
+import static com.bank.history.util.TestData.ENTITY_ID_1;
+import static com.bank.history.util.TestData.TRANSFER_AUDIT_ID;
+import static com.bank.history.util.TestData.PROFILE_AUDIT_ID;
+import static com.bank.history.util.TestData.ACCOUNT_AUDIT_ID;
+import static com.bank.history.util.TestData.ANTI_FRAUD_AUDIT_ID;
+import static com.bank.history.util.TestData.PUBLIC_BANK_INFO_AUDIT_ID;
+import static com.bank.history.util.TestData.ENTITY_ID_10;
+import static com.bank.history.util.TestData.TRANSFER_AUDIT_ID_2;
+import static com.bank.history.util.TestData.PROFILE_AUDIT_ID_2;
+import static com.bank.history.util.TestData.ACCOUNT_AUDIT_ID_2;
+import static com.bank.history.util.TestData.SINGLE_ENTITY_ID;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
