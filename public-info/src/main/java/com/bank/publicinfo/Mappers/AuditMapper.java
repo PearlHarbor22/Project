@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface AuditMapper {
+
     AuditDto toAuditDto(Audit audit);
 
     Audit toAudit(AuditDto auditDto);

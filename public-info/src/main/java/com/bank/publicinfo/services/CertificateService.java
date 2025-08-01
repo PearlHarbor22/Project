@@ -1,7 +1,8 @@
 package com.bank.publicinfo.services;
 
 import com.bank.publicinfo.dto.CertificateDto;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface CertificateService {
 
@@ -13,5 +14,5 @@ public interface CertificateService {
 
     CertificateDto getById(Long id);
 
-    List<CertificateDto> getAll();
+    Page<CertificateDto> getAll(Pageable pageable);
 }

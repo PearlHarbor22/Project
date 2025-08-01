@@ -1,7 +1,8 @@
 package com.bank.publicinfo.services;
 
 import com.bank.publicinfo.dto.BankDetailsDto;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface BankDetailsService {
 
@@ -13,5 +14,5 @@ public interface BankDetailsService {
 
     BankDetailsDto getById(Long id);
 
-    List<BankDetailsDto> getAll();
+    Page<BankDetailsDto> getAll(Pageable pageable);
 }

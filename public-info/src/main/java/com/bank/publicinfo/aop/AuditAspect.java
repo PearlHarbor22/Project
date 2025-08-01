@@ -17,7 +17,7 @@ public class AuditAspect {
     @Autowired
     public AuditAspect(@Lazy AuditService auditService) {this.auditService = auditService;}
 
-    @Pointcut("within(@com.bank.publicinfo.services.AuditServiceImpl *)")
+    @Pointcut("within(com.bank.publicinfo.services.AuditService)")
     public void auditedClass() {
     }
     @Pointcut("execution(* create*(..)) || execution(* update*(..))")

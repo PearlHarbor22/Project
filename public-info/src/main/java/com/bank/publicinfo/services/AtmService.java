@@ -1,7 +1,8 @@
 package com.bank.publicinfo.services;
 
 import com.bank.publicinfo.dto.AtmDto;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface AtmService {
 
@@ -13,5 +14,5 @@ public interface AtmService {
 
     AtmDto getById(Long id);
 
-    List<AtmDto> getAll();
+    Page<AtmDto> getAll(Pageable pageable);
 }

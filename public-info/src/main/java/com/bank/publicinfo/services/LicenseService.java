@@ -1,7 +1,8 @@
 package com.bank.publicinfo.services;
 
 import com.bank.publicinfo.dto.LicenseDto;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface LicenseService {
 
@@ -13,5 +14,5 @@ public interface LicenseService {
 
     LicenseDto getById(Long id);
 
-    List<LicenseDto> getAll();
+    Page<LicenseDto> getAll(Pageable pageable);
 }

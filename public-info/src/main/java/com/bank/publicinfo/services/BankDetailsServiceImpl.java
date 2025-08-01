@@ -6,12 +6,12 @@ import com.bank.publicinfo.Mappers.BankDetailsMapper;
 import com.bank.publicinfo.kafkaProducer.BankDetailsProducer;
 import com.bank.publicinfo.repositories.BankDetailsRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Сервис для управления банковскими реквизитами.
@@ -81,10 +81,11 @@ public class BankDetailsServiceImpl implements BankDetailsService {
     @Transactional
     @Override
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new EntityNotFoundException("Банк с id " + id + " не найден");
-        }
-        repository.deleteById(id);
+        BankDetails bank = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Банк с id " + id + " не найден"));
+
+        repository.delete(bank);
+
         BankDetailsDto dto = new BankDetailsDto();
         dto.setId(id);
         bankDetailsProducer.sendDelete(dto);
@@ -96,6 +97,7 @@ public class BankDetailsServiceImpl implements BankDetailsService {
      * @param id ID сущности
      * @return найденный DTO
      */
+    @Transactional(readOnly = true)
     @Override
     public BankDetailsDto getById(Long id) {
         return repository.findById(id)
@@ -108,11 +110,9 @@ public class BankDetailsServiceImpl implements BankDetailsService {
      *
      * @return список DTO
      */
-    @Override
-    public List<BankDetailsDto> getAll() {
-        return repository.findAll()
-                .stream()
-                .map(mapper::toDto)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public Page<BankDetailsDto> getAll(Pageable pageable) {
+        return repository.findAll(pageable)
+                .map(mapper::toDto);
     }
 }

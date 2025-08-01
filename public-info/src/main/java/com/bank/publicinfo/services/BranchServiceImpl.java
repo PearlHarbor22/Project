@@ -7,21 +7,23 @@ import com.bank.publicinfo.Mappers.BranchMapper;
 import com.bank.publicinfo.repositories.BankDetailsRepository;
 import com.bank.publicinfo.repositories.BranchRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class BranchServiceImpl implements BranchService {
 
     private final BranchRepository branchRepository;
     private final BankDetailsRepository bankDetailsRepository;
     private final BranchMapper branchMapper;
 
+    @Transactional
     @Override
     public BranchDto create(BranchDto dto) {
         Branch branch = branchMapper.toEntity(dto);
@@ -34,6 +36,7 @@ public class BranchServiceImpl implements BranchService {
         return branchMapper.toDto(saved);
     }
 
+    @Transactional
     @Override
     public BranchDto update(Long id, BranchDto dto) {
         Branch existing = branchRepository.findById(id)
@@ -45,7 +48,11 @@ public class BranchServiceImpl implements BranchService {
         existing.setStartOfWork(dto.getStartOfWork());
         existing.setEndOfWork(dto.getEndOfWork());
 
-        if (!existing.getBankDetails().getId().equals(dto.getBankDetailsId())) {
+        Long existingBankId = Optional.ofNullable(existing.getBankDetails())
+                .map(BankDetails::getId)
+                .orElse(null);
+
+        if (!Objects.equals(existingBankId, dto.getBankDetailsId())) {
             BankDetails newBank = bankDetailsRepository.findById(dto.getBankDetailsId())
                     .orElseThrow(() -> new EntityNotFoundException("Банк с id " + dto.getBankDetailsId() + " не найден"));
             existing.setBankDetails(newBank);
@@ -54,14 +61,16 @@ public class BranchServiceImpl implements BranchService {
         return branchMapper.toDto(branchRepository.save(existing));
     }
 
+    @Transactional
     @Override
     public void delete(Long id) {
-        if (!branchRepository.existsById(id)) {
-            throw new EntityNotFoundException("Отделение с id " + id + " не найдено");
-        }
-        branchRepository.deleteById(id);
+        Branch branch = branchRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Отделение с id " + id + " не найдено"));
+
+        branchRepository.delete(branch);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public BranchDto getById(Long id) {
         return branchRepository.findById(id)
@@ -69,13 +78,10 @@ public class BranchServiceImpl implements BranchService {
                 .orElseThrow(() -> new EntityNotFoundException("Отделение с id " + id + " не найдено"));
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public List<BranchDto> getAll() {
-        return branchRepository.findAll()
-                .stream()
-                .map(branchMapper::toDto)
-                .collect(Collectors.toList());
+    public Page<BranchDto> getAll(Pageable pageable) {
+        return branchRepository.findAll(pageable)
+                .map(branchMapper::toDto);
     }
-
-
 }

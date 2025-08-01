@@ -7,20 +7,22 @@ import com.bank.publicinfo.Mappers.CertificateMapper;
 import com.bank.publicinfo.repositories.BankDetailsRepository;
 import com.bank.publicinfo.repositories.CertificateRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class CertificateServiceImpl implements CertificateService {
     private final CertificateRepository certificateRepository;
     private final BankDetailsRepository bankDetailsRepository;
     private final CertificateMapper certificateMapper;
 
+    @Transactional
     @Override
     public CertificateDto create(CertificateDto dto) {
         Certificate certificate = certificateMapper.toEntity(dto);
@@ -32,6 +34,7 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateMapper.toDto(certificateRepository.save(certificate));
     }
 
+    @Transactional
     @Override
     public CertificateDto update(Long id, CertificateDto dto) {
         Certificate existing = certificateRepository.findById(id)
@@ -39,7 +42,11 @@ public class CertificateServiceImpl implements CertificateService {
 
         existing.setPhoto(dto.getPhoto());
 
-        if (!existing.getBankDetails().getId().equals(dto.getBankDetailsId())) {
+        Long existingBankId = Optional.ofNullable(existing.getBankDetails())
+                .map(BankDetails::getId)
+                .orElse(null);
+
+        if (!Objects.equals(existingBankId, dto.getBankDetailsId())) {
             BankDetails newBank = bankDetailsRepository.findById(dto.getBankDetailsId())
                     .orElseThrow(() -> new EntityNotFoundException("Банк с id " + dto.getBankDetailsId() + " не найден"));
             existing.setBankDetails(newBank);
@@ -48,14 +55,16 @@ public class CertificateServiceImpl implements CertificateService {
         return certificateMapper.toDto(certificateRepository.save(existing));
     }
 
+    @Transactional
     @Override
     public void delete(Long id) {
-        if (!certificateRepository.existsById(id)) {
-            throw new EntityNotFoundException("Сертификат с id " + id + " не найден");
-        }
-        certificateRepository.deleteById(id);
+        Certificate certificate = certificateRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Сертификат с id " + id + " не найден"));
+
+        certificateRepository.delete(certificate);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CertificateDto getById(Long id) {
         return certificateRepository.findById(id)
@@ -63,12 +72,10 @@ public class CertificateServiceImpl implements CertificateService {
                 .orElseThrow(() -> new EntityNotFoundException("Сертификат с id " + id + " не найден"));
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public List<CertificateDto> getAll() {
-        return certificateRepository.findAll()
-                .stream()
-                .map(certificateMapper::toDto)
-                .collect(Collectors.toList());
+    public Page<CertificateDto> getAll(Pageable pageable) {
+        return certificateRepository.findAll(pageable)
+                .map(certificateMapper::toDto);
     }
-
 }
