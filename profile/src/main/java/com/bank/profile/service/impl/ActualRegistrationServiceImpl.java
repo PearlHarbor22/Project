@@ -7,10 +7,12 @@ import com.bank.profile.repository.ActualRegistrationRepository;
 import com.bank.profile.service.ActualRegistrationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -48,16 +50,16 @@ public class ActualRegistrationServiceImpl implements ActualRegistrationService 
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!actualRegistrationRepository.existsById(id)) {
+        try {
+            actualRegistrationRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
             throw new EntityNotFoundException("Фактическая регистрация не найдена: id=" + id);
         }
-        actualRegistrationRepository.deleteById(id);
     }
 
     @Override
-    public List<ActualRegistrationDto> findAll() {
-        return actualRegistrationRepository.findAll().stream()
-                .map(actualRegistrationMapper::toDto)
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<ActualRegistrationDto> findAll(Pageable pageable) {
+        return actualRegistrationRepository.findAll(pageable).map(actualRegistrationMapper::toDto);
     }
 }

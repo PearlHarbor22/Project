@@ -1,8 +1,9 @@
 package com.bank.profile.service;
 
 import com.bank.profile.dto.RegistrationDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 
 public interface RegistrationService {
 
@@ -14,5 +15,6 @@ public interface RegistrationService {
 
     void delete(Long id);
 
-    List<RegistrationDto> findAll();
+    Page<RegistrationDto> findAll(Pageable pageable);
+
 }

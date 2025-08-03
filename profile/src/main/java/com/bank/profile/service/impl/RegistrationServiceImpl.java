@@ -7,10 +7,11 @@ import com.bank.profile.repository.RegistrationRepository;
 import com.bank.profile.service.RegistrationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +41,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RegistrationDto findById(Long id) {
         return registrationRepository.findById(id)
                 .map(registrationMapper::toDto)
@@ -49,16 +51,16 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!registrationRepository.existsById(id)) {
+        try {
+            registrationRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
             throw new EntityNotFoundException("Регистрация не найдена: id = " + id);
         }
-        registrationRepository.deleteById(id);
     }
 
     @Override
-    public List<RegistrationDto> findAll() {
-        return registrationRepository.findAll().stream()
-                .map(registrationMapper::toDto)
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<RegistrationDto> findAll(Pageable pageable) {
+        return registrationRepository.findAll(pageable).map(registrationMapper::toDto);
     }
 }

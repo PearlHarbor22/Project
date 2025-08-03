@@ -5,28 +5,37 @@ import com.bank.profile.entity.AccountDetailsId;
 import com.bank.profile.mapper.AccountDetailsIdMapper;
 import com.bank.profile.repository.AccountDetailsIdRepository;
 import com.bank.profile.service.AccountDetailsIdService;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@RequiredArgsConstructor
 public class AccountDetailsIdServiceImpl implements AccountDetailsIdService {
 
     private final AccountDetailsIdRepository repository;
-
-    @Qualifier("accountDetailsIdMapper")
     private final AccountDetailsIdMapper mapper;
 
+    public AccountDetailsIdServiceImpl(
+            AccountDetailsIdRepository repository,
+            @Qualifier("accountDetailsIdMapperImpl") AccountDetailsIdMapper mapper
+    ) {
+        this.repository = repository;
+        this.mapper = mapper;
+    }
+
     @Override
+    @Transactional
     public AccountDetailsIdDto save(AccountDetailsIdDto dto) {
         AccountDetailsId entity = mapper.toEntity(dto);
         return mapper.toDto(repository.save(entity));
     }
 
     @Override
+    @Transactional
     public AccountDetailsIdDto update(Long id, AccountDetailsIdDto dto) {
         AccountDetailsId existing = repository.findById(id)
                 .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("AccountDetailsId не найден: id=" + id));
@@ -43,15 +52,17 @@ public class AccountDetailsIdServiceImpl implements AccountDetailsIdService {
     }
 
     @Override
-    public List<AccountDetailsIdDto> findAll() {
-        return repository.findAll().stream().map(mapper::toDto).toList();
+    public Page<AccountDetailsIdDto> findAll(Pageable pageable) {
+        return repository.findAll(pageable).map(mapper::toDto);
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new jakarta.persistence.EntityNotFoundException("AccountDetailsId не найден: id=" + id);
+        try {
+            repository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new EntityNotFoundException("AccountDetailsId не найден: id=" + id);
         }
-        repository.deleteById(id);
     }
 } 

@@ -8,10 +8,11 @@ import com.bank.profile.repository.PassportRepository;
 import com.bank.profile.service.PassportService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +50,7 @@ public class PassportServiceImpl implements PassportService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PassportDto findById(Long id) {
         return passportRepository.findById(id)
                 .map(passportMapper::toDto)
@@ -58,16 +60,16 @@ public class PassportServiceImpl implements PassportService {
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!passportRepository.existsById(id)) {
+        try {
+            passportRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
             throw new EntityNotFoundException("Паспорт не найден: id = " + id);
         }
-        passportRepository.deleteById(id);
     }
 
     @Override
-    public List<PassportDto> findAll() {
-        return passportRepository.findAll().stream()
-                .map(passportMapper::toDto)
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<PassportDto> findAll(Pageable pageable) {
+        return passportRepository.findAll(pageable).map(passportMapper::toDto);
     }
 }

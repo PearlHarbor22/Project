@@ -12,10 +12,11 @@ import com.bank.profile.service.ProfileService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * Реализация сервиса {@link com.bank.profile.service.ProfileService} для управления данными профиля пользователя.
@@ -92,22 +93,23 @@ public class ProfileServiceImpl implements ProfileService {
      * @throws EntityNotFoundException если профиль не найден
      */
     @Override
+    @Transactional(readOnly = true)
     public ProfileDto findById(Long id) {
-        Profile profile = profileRepository.findById(id)
+        return profileRepository.findById(id)
+                .map(profileMapper::toDto)
                 .orElseThrow(() -> new EntityNotFoundException("Профиль не найден: id = " + id));
-        return profileMapper.toDto(profile);
     }
 
     /**
-     * Возвращает список всех профилей в базе данных.
+     * Возвращает список всех профилей с пагинацией.
      *
-     * @return список всех профилей
+     * @param pageable параметры страницы
+     * @return страница с DTO профилей
      */
     @Override
-    public List<ProfileDto> findAll() {
-        return profileRepository.findAll().stream()
-                .map(profileMapper::toDto)
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<ProfileDto> findAll(Pageable pageable) {
+        return profileRepository.findAll(pageable).map(profileMapper::toDto);
     }
 
     /**
@@ -120,12 +122,15 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Transactional
     public void delete(Long id) {
-        Profile profile = profileRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Профиль не найден: id = " + id));
+        try {
+            profileRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new EntityNotFoundException("Профиль не найден: id = " + id);
+        }
 
-        profileRepository.deleteById(id);
-
-        ProfileDto dto = profileMapper.toDto(profile);
+        ProfileDto dto = new ProfileDto();
+        dto.setId(id);
         kafkaProducer.sendDelete(dto);
     }
 }
+

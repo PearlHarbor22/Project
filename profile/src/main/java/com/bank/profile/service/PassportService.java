@@ -1,8 +1,9 @@
 package com.bank.profile.service;
 
 import com.bank.profile.dto.PassportDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 
 public interface PassportService {
 
@@ -14,5 +15,6 @@ public interface PassportService {
 
     void delete(Long id);
 
-    List<PassportDto> findAll();
+    Page<PassportDto> findAll(Pageable pageable);
+
 }
