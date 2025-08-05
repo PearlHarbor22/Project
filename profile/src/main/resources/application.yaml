@@ -3,3 +3,8 @@ spring:
     name: profile-app
   profiles:
     active: local
+  kafka:
+    consumer:
+      group-id: profile-group
+      auto-offset-reset: latest
+      enable-auto-commit: true
