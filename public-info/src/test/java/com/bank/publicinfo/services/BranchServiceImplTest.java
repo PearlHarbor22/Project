@@ -10,6 +10,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,12 +23,14 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class BranchServiceImplTest {
@@ -42,6 +46,10 @@ class BranchServiceImplTest {
     private static final Long PHONE = 1234567890L;
     private static final LocalTime START = LocalTime.of(9, 0);
     private static final LocalTime END = LocalTime.of(18, 0);
+    private static final int PAGE = 0;
+    private static final int SIZE = 5;
+    private static final int FIRST_INDEX = 0;
+    private static final int EXPECTED_TOTAL_ELEMENTS = 1;
 
     @Mock
     private BranchRepository branchRepository;
@@ -57,6 +65,9 @@ class BranchServiceImplTest {
     private BranchDto expectedDto;
     private Branch branchEntity;
 
+    @Captor
+    private ArgumentCaptor<Branch> branchCaptor;
+
     @BeforeEach
     void setUp() {
         inputDto = new BranchDto();
@@ -68,7 +79,7 @@ class BranchServiceImplTest {
         inputDto.setEndOfWork(END);
 
         expectedDto = new BranchDto();
-        branchEntity = mock(Branch.class);
+        branchEntity = new Branch();
     }
 
     @Test
@@ -83,7 +94,7 @@ class BranchServiceImplTest {
         BranchDto result = branchService.create(inputDto);
 
         assertEquals(expectedDto, result);
-        verify(branchEntity).setBankDetails(bankDetails);
+        assertEquals(bankDetails, branchEntity.getBankDetails());
     }
 
     @Test
@@ -92,6 +103,17 @@ class BranchServiceImplTest {
         when(bankDetailsRepository.findById(NEW_BANK_ID)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> branchService.create(inputDto));
+    }
+
+    @Test
+    void create_WhenBankIdNull_ShouldThrowEntityNotFound() {
+        inputDto.setBankDetailsId(null);
+        when(branchMapper.toEntity(inputDto)).thenReturn(branchEntity);
+        when(bankDetailsRepository.findById(isNull())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> branchService.create(inputDto));
+
+        assertNull(branchEntity.getBankDetails());
     }
 
     @Test
@@ -106,13 +128,22 @@ class BranchServiceImplTest {
 
         when(branchRepository.findById(EXISTING_BRANCH_ID)).thenReturn(Optional.of(existing));
         when(bankDetailsRepository.findById(NEW_BANK_ID)).thenReturn(Optional.of(newBank));
-        when(branchRepository.save(existing)).thenReturn(branchEntity);
+        when(branchRepository.save(any(Branch.class))).thenReturn(branchEntity);
         when(branchMapper.toDto(branchEntity)).thenReturn(expectedDto);
 
         BranchDto result = branchService.update(EXISTING_BRANCH_ID, inputDto);
 
         assertEquals(expectedDto, result);
-        assertEquals(newBank, existing.getBankDetails());
+
+        verify(branchRepository).save(branchCaptor.capture());
+        Branch saved = branchCaptor.getValue();
+
+        assertEquals(newBank, saved.getBankDetails());
+        assertEquals(ADDRESS, saved.getAddress());
+        assertEquals(CITY, saved.getCity());
+        assertEquals(PHONE, saved.getPhoneNumber());
+        assertEquals(START, saved.getStartOfWork());
+        assertEquals(END, saved.getEndOfWork());
     }
 
     @Test
@@ -189,7 +220,7 @@ class BranchServiceImplTest {
 
     @Test
     void getAll_ShouldReturnPagedDtoList() {
-        Pageable pageable = PageRequest.of(0, 5);
+        Pageable pageable = PageRequest.of(PAGE, SIZE);
         Page<Branch> branchPage = new PageImpl<>(List.of(branchEntity));
 
         when(branchRepository.findAll(pageable)).thenReturn(branchPage);
@@ -197,7 +228,7 @@ class BranchServiceImplTest {
 
         Page<BranchDto> result = branchService.getAll(pageable);
 
-        assertEquals(1, result.getTotalElements());
-        assertEquals(expectedDto, result.getContent().get(0));
+        assertEquals(EXPECTED_TOTAL_ELEMENTS, result.getTotalElements());
+        assertEquals(expectedDto, result.getContent().get(FIRST_INDEX));
     }
 }

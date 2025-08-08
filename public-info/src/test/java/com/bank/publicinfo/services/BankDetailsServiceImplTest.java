@@ -5,10 +5,11 @@ import com.bank.publicinfo.dto.BankDetailsDto;
 import com.bank.publicinfo.entities.BankDetails;
 import com.bank.publicinfo.kafkaProducer.BankDetailsProducer;
 import com.bank.publicinfo.repositories.BankDetailsRepository;
-import com.bank.publicinfo.services.BankDetailsServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +40,8 @@ class BankDetailsServiceImplTest {
     private static final String BANK_NAME = "TestBank";
     private static final int PAGE = 0;
     private static final int SIZE = 10;
+    private static final int EXPECTED_TOTAL_ELEMENTS = 1;
+    private static final int FIRST_INDEX = 0;
 
     @Mock
     private BankDetailsRepository repository;
@@ -50,6 +54,9 @@ class BankDetailsServiceImplTest {
 
     @InjectMocks
     private BankDetailsServiceImpl service;
+
+    @Captor
+    private ArgumentCaptor<BankDetails> bankDetailsCaptor;
 
     @Test
     void testCreate_shouldSucceed() {
@@ -71,21 +78,37 @@ class BankDetailsServiceImplTest {
     @Test
     void testUpdate_shouldSucceed() {
         BankDetailsDto dto = new BankDetailsDto();
-        dto.setBik(BIK); dto.setInn(INN); dto.setKpp(KPP);
-        dto.setCorAccount(COR_ACCOUNT); dto.setCity(CITY); dto.setJointStockCompany(JSC); dto.setName(BANK_NAME);
+        dto.setBik(BIK);
+        dto.setInn(INN);
+        dto.setKpp(KPP);
+        dto.setCorAccount(COR_ACCOUNT);
+        dto.setCity(CITY);
+        dto.setJointStockCompany(JSC);
+        dto.setName(BANK_NAME);
 
         BankDetails existing = new BankDetails();
         BankDetails updated = new BankDetails();
         BankDetailsDto updatedDto = new BankDetailsDto();
 
         when(repository.findById(EXISTING_ID)).thenReturn(Optional.of(existing));
-        when(repository.save(existing)).thenReturn(updated);
+        when(repository.save(any(BankDetails.class))).thenReturn(updated);
         when(mapper.toDto(updated)).thenReturn(updatedDto);
 
         BankDetailsDto result = service.update(EXISTING_ID, dto);
 
         assertEquals(updatedDto, result);
         verify(producer).sendUpdate(updatedDto);
+
+        verify(repository).save(bankDetailsCaptor.capture());
+        BankDetails captured = bankDetailsCaptor.getValue();
+
+        assertEquals(BIK, captured.getBik());
+        assertEquals(INN, captured.getInn());
+        assertEquals(KPP, captured.getKpp());
+        assertEquals(COR_ACCOUNT, captured.getCorAccount());
+        assertEquals(CITY, captured.getCity());
+        assertEquals(JSC, captured.getJointStockCompany());
+        assertEquals(BANK_NAME, captured.getName());
     }
 
     @Test
@@ -145,7 +168,7 @@ class BankDetailsServiceImplTest {
 
         Page<BankDetailsDto> result = service.getAll(pageable);
 
-        assertEquals(1, result.getTotalElements());
-        assertEquals(dto, result.getContent().get(0));
+        assertEquals(EXPECTED_TOTAL_ELEMENTS, result.getTotalElements());
+        assertEquals(dto, result.getContent().get(FIRST_INDEX));
     }
 }

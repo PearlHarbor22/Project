@@ -16,8 +16,7 @@ class KafkaErrorLoggerTest {
     private static final String ERROR_MESSAGE_NULL = "Another error";
     private static final String PAYLOAD_STRING = "Test payload";
     private static final String PAYLOAD_TYPE_STRING = "String";
-    private static final String PAYLOAD_TYPE_NULL = "null";
-    private static final String PAYLOAD_CONTENT_NULL = "null";
+    private static final String NULL_STRING = "null";
 
     @BeforeEach
     void setup() {
@@ -46,8 +45,8 @@ class KafkaErrorLoggerTest {
 
         assertThat(logCaptor.getLogs()).anyMatch(log ->
                 log.contains(ERROR_TYPE_KAFKA + ": " + ERROR_MESSAGE_NULL) &&
-                        log.contains("Тип объекта: " + PAYLOAD_TYPE_NULL) &&
-                        log.contains("содержимое: " + PAYLOAD_CONTENT_NULL)
+                        log.contains("Тип объекта: " + NULL_STRING) &&
+                        log.contains("содержимое: " + NULL_STRING)
         );
     }
 }

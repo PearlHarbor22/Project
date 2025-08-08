@@ -1,16 +1,16 @@
 package com.bank.publicinfo.services;
 
+import com.bank.publicinfo.Mappers.AtmMapper;
 import com.bank.publicinfo.dto.AtmDto;
 import com.bank.publicinfo.entities.ATM;
 import com.bank.publicinfo.entities.Branch;
-import com.bank.publicinfo.Mappers.AtmMapper;
 import com.bank.publicinfo.repositories.AtmRepository;
 import com.bank.publicinfo.repositories.BranchRepository;
-import com.bank.publicinfo.services.AtmServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -21,6 +21,9 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class AtmServiceImplTest {
@@ -32,6 +35,8 @@ class AtmServiceImplTest {
     private static final String NEW_ADDRESS = "New Address";
     private static final LocalTime START_OF_WORK = LocalTime.of(8, 0);
     private static final LocalTime END_OF_WORK = LocalTime.of(20, 0);
+    private static final int EXPECTED_TOTAL_ELEMENTS = 1;
+    private static final int FIRST_INDEX = 0;
 
     @Mock
     private AtmRepository atmRepository;
@@ -45,13 +50,17 @@ class AtmServiceImplTest {
     @InjectMocks
     private AtmServiceImpl atmService;
 
+    @Captor
+    private ArgumentCaptor<ATM> atmCaptor;
+
     @Test
     void testCreateAtm_shouldCreateSuccessfully() {
         AtmDto dto = new AtmDto();
         dto.setBranchId(OLD_BRANCH_ID);
 
         ATM atmEntity = new ATM();
-        Branch branch = new Branch(); branch.setId(OLD_BRANCH_ID);
+        Branch branch = new Branch();
+        branch.setId(OLD_BRANCH_ID);
         ATM savedAtm = new ATM();
         AtmDto resultDto = new AtmDto();
 
@@ -62,7 +71,7 @@ class AtmServiceImplTest {
 
         AtmDto result = atmService.create(dto);
 
-        Assertions.assertEquals(resultDto, result);
+        assertEquals(resultDto, result);
     }
 
     @Test
@@ -74,7 +83,7 @@ class AtmServiceImplTest {
         Mockito.when(atmMapper.toEntity(dto)).thenReturn(atmEntity);
         Mockito.when(branchRepository.findById(NON_EXISTING_ID)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(EntityNotFoundException.class, () -> atmService.create(dto));
+        assertThrows(EntityNotFoundException.class, () -> atmService.create(dto));
     }
 
     @Test
@@ -87,41 +96,54 @@ class AtmServiceImplTest {
         dto.setBranchId(NEW_BRANCH_ID);
 
         ATM existingAtm = new ATM();
-        Branch oldBranch = new Branch(); oldBranch.setId(OLD_BRANCH_ID);
+        Branch oldBranch = new Branch();
+        oldBranch.setId(OLD_BRANCH_ID);
         existingAtm.setBranch(oldBranch);
 
-        Branch newBranch = new Branch(); newBranch.setId(NEW_BRANCH_ID);
+        Branch newBranch = new Branch();
+        newBranch.setId(NEW_BRANCH_ID);
         ATM updatedAtm = new ATM();
         AtmDto updatedDto = new AtmDto();
 
         Mockito.when(atmRepository.findById(EXISTING_ATM_ID)).thenReturn(Optional.of(existingAtm));
         Mockito.when(branchRepository.findById(NEW_BRANCH_ID)).thenReturn(Optional.of(newBranch));
-        Mockito.when(atmRepository.save(existingAtm)).thenReturn(updatedAtm);
+        Mockito.when(atmRepository.save(Mockito.any(ATM.class))).thenReturn(updatedAtm);
         Mockito.when(atmMapper.toDto(updatedAtm)).thenReturn(updatedDto);
 
         AtmDto result = atmService.update(EXISTING_ATM_ID, dto);
 
-        Assertions.assertEquals(updatedDto, result);
+        assertEquals(updatedDto, result);
+
+        Mockito.verify(atmRepository).save(atmCaptor.capture());
+        ATM capturedAtm = atmCaptor.getValue();
+
+        assertEquals(NEW_ADDRESS, capturedAtm.getAddress());
+        assertEquals(START_OF_WORK, capturedAtm.getStartOfWork());
+        assertEquals(END_OF_WORK, capturedAtm.getEndOfWork());
+        assertTrue(capturedAtm.getAllHours());
+        assertEquals(NEW_BRANCH_ID, capturedAtm.getBranch().getId());
     }
 
     @Test
     void testUpdateAtm_notFound_shouldThrow() {
         Mockito.when(atmRepository.findById(EXISTING_ATM_ID)).thenReturn(Optional.empty());
-        Assertions.assertThrows(EntityNotFoundException.class, () -> atmService.update(EXISTING_ATM_ID, new AtmDto()));
+        assertThrows(EntityNotFoundException.class, () -> atmService.update(EXISTING_ATM_ID, new AtmDto()));
     }
 
     @Test
     void testUpdateAtm_newBranchNotFound_shouldThrow() {
         ATM existing = new ATM();
-        Branch oldBranch = new Branch(); oldBranch.setId(OLD_BRANCH_ID);
+        Branch oldBranch = new Branch();
+        oldBranch.setId(OLD_BRANCH_ID);
         existing.setBranch(oldBranch);
 
-        AtmDto dto = new AtmDto(); dto.setBranchId(NEW_BRANCH_ID);
+        AtmDto dto = new AtmDto();
+        dto.setBranchId(NEW_BRANCH_ID);
 
         Mockito.when(atmRepository.findById(EXISTING_ATM_ID)).thenReturn(Optional.of(existing));
         Mockito.when(branchRepository.findById(NEW_BRANCH_ID)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(EntityNotFoundException.class, () -> atmService.update(EXISTING_ATM_ID, dto));
+        assertThrows(EntityNotFoundException.class, () -> atmService.update(EXISTING_ATM_ID, dto));
     }
 
     @Test
@@ -137,7 +159,7 @@ class AtmServiceImplTest {
     @Test
     void testDeleteAtm_notFound_shouldThrow() {
         Mockito.when(atmRepository.findById(EXISTING_ATM_ID)).thenReturn(Optional.empty());
-        Assertions.assertThrows(EntityNotFoundException.class, () -> atmService.delete(EXISTING_ATM_ID));
+        assertThrows(EntityNotFoundException.class, () -> atmService.delete(EXISTING_ATM_ID));
     }
 
     @Test
@@ -149,13 +171,13 @@ class AtmServiceImplTest {
         Mockito.when(atmMapper.toDto(atm)).thenReturn(dto);
 
         AtmDto result = atmService.getById(EXISTING_ATM_ID);
-        Assertions.assertEquals(dto, result);
+        assertEquals(dto, result);
     }
 
     @Test
     void testGetById_notFound_shouldThrow() {
         Mockito.when(atmRepository.findById(EXISTING_ATM_ID)).thenReturn(Optional.empty());
-        Assertions.assertThrows(EntityNotFoundException.class, () -> atmService.getById(EXISTING_ATM_ID));
+        assertThrows(EntityNotFoundException.class, () -> atmService.getById(EXISTING_ATM_ID));
     }
 
     @Test
@@ -169,8 +191,8 @@ class AtmServiceImplTest {
 
         Page<AtmDto> result = atmService.getAll(Pageable.unpaged());
 
-        Assertions.assertEquals(1, result.getTotalElements());
-        Assertions.assertEquals(dto, result.getContent().get(0));
+        assertEquals(EXPECTED_TOTAL_ELEMENTS, result.getTotalElements());
+        assertEquals(dto, result.getContent().get(FIRST_INDEX));
     }
 
 }
