@@ -23,7 +23,7 @@ public class SuspiciousTransferProducer {
 
     public void sendSuspiciousTransfer(SuspiciousTransferDto suspiciousTransferDto) {
         try {
-            log.info("Аудит отправлен в топик {}", suspiciousTransferTopic);
+            log.info("Подозрительный трансфер отправлен в топик {}", suspiciousTransferTopic);
             kafkaTemplate.send(suspiciousTransferTopic, suspiciousTransferDto);
         } catch (SerializationException e) {
             kafkaErrorLogger.handleSerializationException(e, suspiciousTransferDto);
