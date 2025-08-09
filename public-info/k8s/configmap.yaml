@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: public-info-config
+data:
+  APP_ENV: "prod"
+  LOG_LEVEL: "info"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/postgres?currentSchema=publicinfo"
+  SPRING_DATASOURCE_USERNAME: "postgres"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  LIQUIBASE_ENABLED: "true"
+  LIQUIBASE_DROP_FIRST: "false"
+  SPRING_PROFILES_ACTIVE: "local"
