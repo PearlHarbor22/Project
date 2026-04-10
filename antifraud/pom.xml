@@ -21,6 +21,19 @@
     </properties>
 
     <dependencies>
+        <!-- Kafka -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
+<!--        Validator-->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>8.0.1.Final</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -28,6 +41,40 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.11</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/dto/*</exclude>
+                                <exclude>**/mapper/*</exclude>
+                                <exclude>**/repository/*</exclude>
+                                <exclude>**/entity/*</exclude>
+                                <exclude>**/SuspiciousTransferDto.java</exclude>
+                                <exclude>**/TransferDto.java</exclude>
+                                <exclude>**/AuditService.java</exclude>
+                                <exclude>**/SuspiciousTransferSaveService.java</exclude>
+                                <exclude>**/SuspiciousTransferService.java</exclude>
+                                <exclude>**/TransferService.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

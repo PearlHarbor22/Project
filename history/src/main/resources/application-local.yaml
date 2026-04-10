@@ -2,6 +2,7 @@ server:
   port: 8088
   servlet:
     context-path: /api/history
+
 management:
   server:
     port: 8188
@@ -12,15 +13,30 @@ management:
     web:
       exposure:
         include: '*'
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5433/postgres
     username: postgres
     password: password
+
   liquibase:
     default-schema: history
     change-log: db/changelog/db.changelog-master.yaml
     enabled: true
     drop-first: false
+
   application:
     name: history-app
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: history-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.bank.history.dto
+        spring.json.value.default.type: com.bank.history.dto.HistoryDto
+        spring.json.use.type.headers: false
